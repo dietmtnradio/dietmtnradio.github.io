@@ -1,0 +1,128 @@
+---
+title: "An Exploration of Demographics and Police Violence"
+author: "Maggie Sellers, Whitney Mulatemwa, Sonia Paredes"
+date: "Last updated on `r Sys.Date()`"
+output:
+  html_document:
+    code_folding: "hide"
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    df_print: kable
+---
+
+# Demographics of Police Violence
+
+This analysis is inspired by a comprehensive and frequently updated database of fatal police shootings as compiled by The Washington Post since January 1st, 2015. The criteria for a victim being included in the database is only in circumstances in which a police officer, in the line of duty, shot and killed a civilian. In particular, there was a need to highlight the disparities that women of color and younger women face in relation to fatal police shootings.
+
+```{r, include= FALSE}
+library(tidyverse)
+library(captioner)
+library(knitr)
+library(kableExtra)
+library(scales)
+# For reading CSV spreadsheet files:
+policekillings <- read_csv("FatalPoliceShootings.csv")
+share_byrace <- read_csv("ShareRaceByCity.csv")
+```
+
+
+## Age Distribution by Race of Women Victims of Police Killings
+```{r, echo = FALSE, warning=FALSE}
+# gender and police killings
+
+bias_analysis <- policekillings %>%
+  filter(gender == "F")
+
+# gender, race, age
+race_labels <- c("Asian", "Black", "Hispanic", "Native American", "Other", "White", "Unknown")
+ggplot(data = bias_analysis, mapping = aes(x = race, y = age, fill = race)) +
+  geom_boxplot() +
+  labs(title = "Women Killed by Police, by Race and Age", 
+       x = "Race", y = "Number of Women Killed", fill = "Race") + 
+  scale_x_discrete(labels = race_labels) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_fill_discrete(labels = race_labels) + 
+  theme(legend.position="none")
+```
+
+This graph plots the age distribution of women killed by police categorizing it by race. It is evenly distributed across people aged between 20 and 55, with a mode of 55. This contravenes the conventional hypothesis of younger women being more vulnerable to police shootings. This graph shows that the number of older Black woman victims is far lower than the number of older White woman victims. In addition, Black, Hispanic, and Native American woman victims all tend to be much younger than White woman victims.
+
+
+**The 10 States with the Most Women Killed by Police**
+```{r, echo = FALSE, warning=FALSE}
+# gender, state
+bias_bystate <- bias_analysis %>%
+  group_by(state) %>%
+  summarize(number_of_deaths = n()) %>%
+  arrange(desc(number_of_deaths)) %>% 
+  slice(1:10) %>% 
+  kable(booktabs= TRUE, 
+        caption = "Top 10 States with Most Police Killings (Females)")
+
+bias_bystate
+```
+
+The above table examines the states with the most women killed by police. Most of these states are in the South, although California is an exception. One possible explanation is the sheer size of California's population.
+
+**Top 10 States with Most Police Killings**
+```{r, echo = FALSE, warning=FALSE}
+# both genders, state
+pokillings_bystate <- policekillings %>%
+  group_by(state) %>%
+  summarize(number_of_deaths = n()) %>%
+  arrange(desc(number_of_deaths)) %>%
+  slice(1:10) %>% 
+  kable(booktabs = TRUE, 
+        caption = "Top 10 States with Most Police Killings (All Genders)")
+
+pokillings_bystate
+```
+
+The above table outlines the states with the most police killings overall. Notably, far fewer of these states are Southern, indicating that Southern police officers are more likely to kill women.
+
+## Threat Level Distribution by Race of Women Killed by Police
+```{r, echo = FALSE, warning=FALSE}
+# Viz on gender, race, threat level
+
+ggplot(data = bias_analysis, 
+       mapping = aes(x = race, fill = threat_level)) +
+   geom_bar(position = position_dodge(preserve = "single")) +
+   labs(
+     title = "Reported Police Perception of 'Criminal' Threat from Women Victims", 
+     x = "Race",  y = "Number of Women Killed", fill = "Threat Level") +
+  scale_x_discrete(labels = race_labels) +
+  theme(axis.text.x = element_text(angle = 90))
+
+```
+
+This graph explores how cops perceive women of various races. Cops reported their victims as attacking them, being threatening but not attacking them, or behaving otherwise. Notably, cops killed Black women for being threatening in ways other than attacking cops more than they were killed for actually attacking, according to police officers. By contrast, far more White victims were actually attacking than appearing threatening in another way.
+
+
+## Examining the Racial Demographics of the States with the Most Police Killings
+```{r, echo=FALSE, warning=FALSE}
+# top 4 states with the most police killings, segregation
+raceshare_bystate <- share_byrace %>%
+  rename(state = `Geographic area`) %>%
+  filter(state == c("CA", "TX", "FL", "AZ")) %>%
+  group_by(City) %>%
+  mutate(share_poc = as.numeric(share_black)+as.numeric(share_native_american)+as.numeric(share_asian)+
+         as.numeric(share_hispanic))
+
+
+ggplot(data = raceshare_bystate, mapping = aes(x = share_poc, y = as.numeric(share_white), color = state)) + 
+  geom_point() + 
+  facet_wrap(~state) +
+  labs(title = "Percentage of POCs vs White People in Cities",
+       subtitle = "The Top 4 States with Most Police Killings",
+       x = "Percentage of People of Color",  y = "Percentage of White People", color = "Location of City")
+```
+
+From the data visuals, it is clear that in cities with greater proportion of white people, there is a smaller proportion of people of color living in those cities. The same can be seen from cities with greater proportion of people of color, there is a smaller proportion of white people. It can be infered that segegation by race is a characteristic of the top four states with the highest numbers of police fatalities.
+
+
+## Further Reading
+
+* Brown, Melissa, et al. "#SayHerName: a case study of intersectional social media activism." Ethnic and Racial Studies 40.11 (2017): 1831-1846.
+* Lonsway, Kim, et al. "Men, women, and police excessive force: A tale of two genders." National Center for Women & Policing. Retrieved from http://womenandpolicing.com/PDF/2002_Excessive_Force. pdf (2002).
+* Brittain, Amy. (2015, Oct 24). On duty, under fire: A Wisconsin trooper faced down a gunman who planned to go out fighting. Retrieved November 21, 2019, from http://www.washingtonpost.com/sf/investigative/2015/10/24/on-duty-under-fire/

@@ -1,0 +1,69 @@
+---
+title: "An Exploration of Demographics and Police Violence"
+author: "Maggie Sellers, Whitney Mulatemwa, Sonia Paredes"
+date: "Last updated on `r Sys.Date()`"
+output:
+  html_document:
+    code_folding: "hide"
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    df_print: kable
+---
+
+<!--
+Comments in HTML are like this! 
+-->
+
+# Race and Policing
+
+## Overview
+
+![](police_header.jpg){ width=1600px }
+
+```{r, echo = FALSE, include=FALSE}
+
+library(tidyverse)
+library(captioner)
+library(knitr)
+library(kableExtra)
+
+# For reading CSV spreadsheet files:
+policekillings <- read_csv("FatalPoliceShootings.csv")
+share_byrace <- read_csv("ShareRaceByCity.csv")
+
+```
+
+Since the end of the Civil War, people of color and other marginalized groups have faced astonishing and disproportionate levels of violence at the hands of police. In the 21st century, with the Internet making communication ever easier, police shootings have sparked calls for racial justice and policing reform across the nation. However, police officers who kill civilians frequently excuse their actions by stating that their lives were under threat. Apologists for police will deny the fact that police violence overwhelmingly affects people of color, disabled people, the poor, women and LGBTQ+ folks, and other marginalized groups. To debunk these harmful assertions, we have compiled a collection of data visualizations to reveal the truth about police violence.
+
+```{r, echo=FALSE, warning=FALSE}
+# scatterplot showing %poc on the x axis and number of police shootings on the y axis
+
+policekillings_bycount <- policekillings %>%
+  group_by(city, state) %>%
+  summarize(total_number_of_deaths = n())
+
+share_byrace_stats <- share_byrace %>%
+  rename(state = `Geographic area`) %>%
+  group_by(City) %>%
+  mutate(share_poc = 100 - as.numeric(share_white))
+
+share_byrace_stats <- share_byrace_stats %>%
+  ungroup() %>%
+  mutate(City = str_replace_all(City, " city", ""))
+
+raceshare_deaths <- share_byrace_stats %>%
+  left_join(policekillings_bycount, by = c("state", "City" = "city")) %>%
+  filter(total_number_of_deaths > 1)
+
+ggplot(data = raceshare_deaths, 
+       mapping = aes(x = share_poc, y = total_number_of_deaths, color = "red")) +
+  geom_point() +
+  labs(title = "The Number of Police Killings vs. Percentage of People of Color",
+       subtitle =  "Correlation between the percentage of people of color in cities and the number of police killings",
+       x = "Percentage of People of Color (%)",
+       y = "Number of Deaths")
+```
+
+While most communities have relatively few police shootings, there is a positive correlation between percentage of people of color and number of police killings. The higher the number of police killings in a community, the more likely it is that a high proportion of that community's population will be people of color.
+

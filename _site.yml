@@ -1,0 +1,21 @@
+name: "my-website"
+output_dir: docs
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    toc_depth: 2
+    theme: paper
+    highlight: tango
+    df_print: paged
+    lib_dir: site_libs
+    self_contained: no
+navbar:
+  title: "Police Brutality"
+  left:
+    - text: "Overview"
+      href: index.html
+    - text: "Further Analysis"
+      href: more_info.html
+    - icon: fa-git fa-lg
+      href: https://github.com/washingtonpost/data-police-shootings
