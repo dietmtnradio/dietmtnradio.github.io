@@ -32,7 +32,7 @@ share_white :
 
 # Link to the Website
 
-The detailed visual report about fatal police shottings in relation to demographics can be found at <https://dietmtnradio.github.io/webpage/>.  
+The detailed visual report about fatal police shottings in relation to demographics can be found at <https://dietmtnradio.github.io/website/>.  
 
 # Special Thanks to:
 * Maggie Sellers - writing wiz
