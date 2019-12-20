@@ -1,6 +1,6 @@
 ---
 title: "An Exploration of Demographics and Police Violence"
-author: "Maggie Sellers, Whitney Mulatemwa, Sonia Paredes "
+author: "Maggie Sellers, Whitney Mulatemwa, Sonia Paredes"
 date: "Last updated on `r Sys.Date()`"
 output:
   html_document:
